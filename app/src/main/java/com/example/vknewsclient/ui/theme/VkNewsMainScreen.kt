@@ -12,11 +12,14 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen() {
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember {
+        SnackbarHostState()
+    }
     val scope = rememberCoroutineScope()
     val fabIsVisible = remember {
         mutableStateOf(true)
     }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackBarHostState)
