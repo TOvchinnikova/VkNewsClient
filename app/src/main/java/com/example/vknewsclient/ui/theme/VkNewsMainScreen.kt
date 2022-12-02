@@ -11,6 +11,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.vknewsclient.NewsFeedViewModel
 import com.example.vknewsclient.domain.FeedPost
 import com.example.vknewsclient.navigation.AppNavGraph
+import com.example.vknewsclient.navigation.Screen
 import com.example.vknewsclient.navigation.rememberNavigationState
 
 @Composable
@@ -51,26 +52,25 @@ fun MainScreen() {
     ) { paddingValues ->
         AppNavGraph(
             navHostController = navigationState.navHostController,
-            homeScreenContent = {
-                if (commentsToPost.value == null) {
-                    HomeScreen(
-                        paddingValues = paddingValues,
-                        onCommentClickListener = {
-                            commentsToPost.value = it
-                        }
-                    )
-                } else {
-                    CommentsScreen(
-                        onBackPressed = {
-                            commentsToPost.value = null
-                        },
-                        feedPost =  commentsToPost.value!!
-                    )
-                }
-
+            newsFeedScreenContent = {
+                HomeScreen(
+                    paddingValues = paddingValues,
+                    onCommentClickListener = {
+                        commentsToPost.value = it
+                        navigationState.navigateTo(Screen.Comments.route)
+                    }
+                )
             },
             favouriteScreenContent = { TextCounter("Favourite") },
-            profileScreenContent = { TextCounter("Profile") }
+            profileScreenContent = { TextCounter("Profile") },
+            commentsScreenContent = {
+                CommentsScreen(
+                    onBackPressed = {
+                        commentsToPost.value = null
+                    },
+                    feedPost = commentsToPost.value!!
+                )
+            }
         )
     }
 }
@@ -82,7 +82,7 @@ private fun TextCounter(name: String) {
     }
 
     Text(
-        modifier = Modifier.clickable { count ++ },
+        modifier = Modifier.clickable { count++ },
         text = "$name Count: $count",
         color = Color.Black
     )
