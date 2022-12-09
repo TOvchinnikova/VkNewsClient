@@ -4,4 +4,6 @@
     <string name="navigation_item_main">Главная</string>
     <string name="navigation_item_favourite">Избранное</string>
     <string name="navigation_item_profile">Профиль</string>
+    <integer name="com_vk_sdk_AppId">51498816</integer>
+    <string name="button_login">Войти</string>
 </resources>
