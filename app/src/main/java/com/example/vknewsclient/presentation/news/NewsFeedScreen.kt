@@ -1,21 +1,19 @@
 package com.example.vknewsclient.presentation.news
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SwipeToDismiss
-import androidx.compose.material.rememberDismissState
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vknewsclient.domain.FeedPost
+import com.example.vknewsclient.ui.theme.DarkBlue
 
 @Composable
 fun NewsFeedScreen(
@@ -31,7 +29,8 @@ fun NewsFeedScreen(
                 posts = currentState.posts,
                 viewModel = viewModel,
                 paddingValues = paddingValues,
-                onCommentClickListener = onCommentClickListener
+                onCommentClickListener = onCommentClickListener,
+                nextDataIsLoading = currentState.nextDataIsLoading
             )
         }
         is NewsFeedScreenState.Initial -> {
@@ -46,7 +45,8 @@ private fun FeedPosts(
     posts: List<FeedPost>,
     viewModel: NewsFeedViewModel,
     paddingValues: PaddingValues,
-    onCommentClickListener: (FeedPost) -> Unit
+    onCommentClickListener: (FeedPost) -> Unit,
+    nextDataIsLoading: Boolean
 ) {
     LazyColumn(
         modifier = Modifier.padding(paddingValues),
@@ -54,7 +54,7 @@ private fun FeedPosts(
             top = 16.dp,
             start = 8.dp,
             end = 8.dp,
-            bottom = 72.dp
+            bottom = 16.dp
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -77,7 +77,7 @@ private fun FeedPosts(
                     onViewsClickListener = { statisticItem ->
                         viewModel.updateCount(feedPost, statisticItem)
                     },
-                    onLikeClickListener = { statisticItem ->
+                    onLikeClickListener = {
                         viewModel.changeLikeStatus(feedPost)
                     },
                     onCommentClickListener = {
@@ -87,6 +87,23 @@ private fun FeedPosts(
                         viewModel.updateCount(feedPost, statisticItem)
                     }
                 )
+            }
+        }
+        item {
+            if (nextDataIsLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = DarkBlue)
+                }
+            } else {
+                SideEffect {
+                    viewModel.loadNextRecommendations()
+                }
             }
         }
     }
