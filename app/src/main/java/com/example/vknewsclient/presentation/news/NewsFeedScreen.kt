@@ -36,6 +36,14 @@ fun NewsFeedScreen(
         is NewsFeedScreenState.Initial -> {
 
         }
+        NewsFeedScreenState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = DarkBlue)
+            }
+        }
     }
 }
 
@@ -74,17 +82,11 @@ private fun FeedPosts(
             ) {
                 PostCard(
                     feedPost = feedPost,
-                    onViewsClickListener = { statisticItem ->
-                        viewModel.updateCount(feedPost, statisticItem)
-                    },
                     onLikeClickListener = {
                         viewModel.changeLikeStatus(feedPost)
                     },
                     onCommentClickListener = {
                         onCommentClickListener(feedPost)
-                    },
-                    onShareClickListener = { statisticItem ->
-                        viewModel.updateCount(feedPost, statisticItem)
                     }
                 )
             }
