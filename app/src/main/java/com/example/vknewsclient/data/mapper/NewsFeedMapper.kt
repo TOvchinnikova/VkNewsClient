@@ -2,10 +2,10 @@ package com.example.vknewsclient.data.mapper
 
 import com.example.vknewsclient.data.model.CommentsResponseDto
 import com.example.vknewsclient.data.model.NewsFeedResponseDto
-import com.example.vknewsclient.domain.FeedPost
-import com.example.vknewsclient.domain.PostComment
-import com.example.vknewsclient.domain.StatisticItem
-import com.example.vknewsclient.domain.StatisticType
+import com.example.vknewsclient.domain.entity.FeedPost
+import com.example.vknewsclient.domain.entity.PostComment
+import com.example.vknewsclient.domain.entity.StatisticItem
+import com.example.vknewsclient.domain.entity.StatisticType
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.absoluteValue
