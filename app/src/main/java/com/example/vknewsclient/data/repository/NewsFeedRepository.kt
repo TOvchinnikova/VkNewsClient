@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.vknewsclient.data.mapper.NewsFeedMapper
 import com.example.vknewsclient.data.network.ApiFactory
 import com.example.vknewsclient.domain.FeedPost
+import com.example.vknewsclient.domain.PostComment
 import com.example.vknewsclient.domain.StatisticItem
 import com.example.vknewsclient.domain.StatisticType
 import com.example.vknewsclient.extensions.mergeWith
@@ -11,10 +12,13 @@ import com.vk.api.sdk.VKPreferencesKeyValueStorage
 import com.vk.api.sdk.auth.VKAccessToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.stateIn
 
 class NewsFeedRepository(
@@ -49,6 +53,9 @@ class NewsFeedRepository(
             _feedPosts.addAll(posts)
             emit(feedPosts)
         }
+    }.retry {
+        delay(RETRY_TIMEOUT_MILLIS)
+        true
     }
 
     private val apiService = ApiFactory.apiService
@@ -82,6 +89,18 @@ class NewsFeedRepository(
         refreshedListFlow.emit(feedPosts)
     }
 
+    fun getComments(feedPost: FeedPost): Flow<List<PostComment>> = flow {
+        val comments = apiService.getComments(
+            accessToken = getAccessToken(),
+            ownerId = feedPost.communityId,
+            postId = feedPost.id
+        )
+        emit(mapper.mapResponseToComments(comments))
+    }.retry {
+        delay(RETRY_TIMEOUT_MILLIS)
+        true
+    }
+
     suspend fun changeLikeStatus(feedPost: FeedPost) {
         val response = if (feedPost.isLiked) {
             apiService.deleteLike(
@@ -112,5 +131,9 @@ class NewsFeedRepository(
 
     private fun getAccessToken(): String {
         return token?.accessToken ?: throw IllegalStateException("Token is null")
+    }
+
+    companion object {
+        private const val RETRY_TIMEOUT_MILLIS = 3000L
     }
 }
