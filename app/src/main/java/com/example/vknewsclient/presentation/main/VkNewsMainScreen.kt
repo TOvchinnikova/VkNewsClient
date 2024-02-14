@@ -73,7 +73,6 @@ fun MainScreen(
                     onBackPressed = {
                         navigationState.navHostController.popBackStack()
                     },
-                    viewModelFactory = viewModelFactory,
                     feedPost = feedPost
                 )
             }
