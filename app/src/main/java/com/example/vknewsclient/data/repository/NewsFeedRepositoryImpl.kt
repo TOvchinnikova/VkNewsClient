@@ -1,8 +1,7 @@
 package com.example.vknewsclient.data.repository
 
-import android.app.Application
 import com.example.vknewsclient.data.mapper.NewsFeedMapper
-import com.example.vknewsclient.data.network.ApiFactory
+import com.example.vknewsclient.data.network.ApiService
 import com.example.vknewsclient.domain.entity.AuthState
 import com.example.vknewsclient.domain.entity.FeedPost
 import com.example.vknewsclient.domain.entity.PostComment
@@ -21,12 +20,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class NewsFeedRepositoryImpl(
-    application: Application
+class NewsFeedRepositoryImpl @Inject constructor(
+    private val apiService: ApiService,
+    private val mapper: NewsFeedMapper,
+    private val storage: VKPreferencesKeyValueStorage
 ) : NewsFeedRepository {
 
-    private val storage = VKPreferencesKeyValueStorage(application)
     private val token
         get() = VKAccessToken.restore(storage)
 
@@ -46,8 +47,7 @@ class NewsFeedRepositoryImpl(
 
             val response = if (startFrom == null) {
                 apiService.loadRecommendations(getAccessToken())
-            }
-            else {
+            } else {
                 apiService.loadRecommendations(getAccessToken(), startFrom)
             }
             nextFrom = response.newsFeedContent.nextFrom
@@ -59,9 +59,6 @@ class NewsFeedRepositoryImpl(
         delay(RETRY_TIMEOUT_MILLIS)
         true
     }
-
-    private val apiService = ApiFactory.apiService
-    private val mapper = NewsFeedMapper()
 
     private val _feedPosts = mutableListOf<FeedPost>()
     private val feedPosts: List<FeedPost>
